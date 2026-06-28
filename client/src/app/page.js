@@ -14,19 +14,19 @@ export default function Tabs() {
   const [activeTab, setActiveTab] = useState(tabs[0].id);
 
   return (
-    <div class="bg-gray-400 min-h-screen flex flex-col">
+    <div className="bg-gray-400 min-h-screen flex flex-col">
       {/* Header */}
-      <div class="mx-auto flex justify-center items-center bg-blue-500 h-16 w-full mb-2 gap-4">
-        <img src='/images/njdot_img.png' class="h-14 w-auto" />
-        <h1 class="text-4xl text-white font-bold">NJDOT Data Collection</h1>
+      <div className="mx-auto flex justify-center items-center bg-blue-500 h-16 w-full mb-2 gap-4">
+        <img src='/images/njdot_img.png' className="h-14 w-auto" />
+        <h1 className="text-4xl text-white font-bold">NJDOT Data Collection</h1>
       </div>
 
       {/* Body */}
-      <div class="flex flex-1 mb-2">
+      <div className="flex flex-1 mb-2">
         {/* Tabs */}
-        <div class="items-start flex flex-col gap-x-10 bg-gray-100">
+        <div className="items-start flex flex-col gap-x-10 bg-gray-400">
           {tabs.map((tab) => (
-            <button class=
+            <button className=
             {
               `text-black border-2 text-center w-32 h-12 
               ${activeTab === tab.id ? "bg-blue-200 bold hover:bg-blue-300" : "bg-white hover:bg-gray-300"}`
@@ -42,7 +42,7 @@ export default function Tabs() {
         </div>
 
         {/* Content */}
-        <div class="bg-white w-full ml-2 mr-2">
+        <div className="bg-white w-full ml-2 mr-2">
           {tabs.find(t => t.id === activeTab)?.content}
         </div>
       </div>
