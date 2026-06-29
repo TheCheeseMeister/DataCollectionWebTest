@@ -9,7 +9,7 @@ const verificationRoutes = require("./routes/VerificationResult");
 
 const allowedOrigins = [
     "http://localhost:3000",
-    "http://localhost:5000"
+    "https://polite-tree-09d793b1e.7.azurestaticapps.net"
 ];
 
 app.use(cors({
