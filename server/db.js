@@ -12,12 +12,14 @@ const config = {
     }
 };
 
+let pool;
+
 async function getConnection() {
-    try {
-        return await sql.connect(config);
-    } catch(err) {
-        console.error(err);
-    }
+    if (pool) return pool;
+
+    pool = await sql.connect(config);
+    console.log("DB pool initialized");
+    return pool;
 }
 
 module.exports = {
