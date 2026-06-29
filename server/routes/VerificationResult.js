@@ -109,10 +109,11 @@ router.post("/upload-issue", async(req, res) => {
             .input("Priority", priority)
             .input("Comments", comments)
             .input("AssignedTo", assigned)
-            .input("IssueID", IssueID);
         
         if (recordType === "New Record") {
-            await request.query(`
+            const newIssueID = await generateIssueID(pool);
+            
+            await request.input("IssueID", newIssueID).query(`
                 INSERT INTO tblDataCollectionIssuesList (
                     IssuesID,
                     AssignedTo,
@@ -128,7 +129,7 @@ router.post("/upload-issue", async(req, res) => {
                     [Follow Up]
                 )
                 VALUES (
-                    52202,
+                    @IssueID,
                     @AssignedTo,
                     @Comments,
                     @Priority,
@@ -145,7 +146,7 @@ router.post("/upload-issue", async(req, res) => {
 
             return res.json({ message: "New issue created successfully" });
         } else {
-            await request.query(`
+            await request.input("IssueID", IssueID).query(`
                 UPDATE tblDataCollectionIssuesList
                 SET
                     AssignedTo = @AssignedTo,
@@ -180,16 +181,15 @@ router.post("/upload-qa", async(req, res) => {
             verificationResult,
             dateCert,
             comments,
-            certifications
+            certifications,
+            Existing_QAID
         } = req.body;
 
         const request = pool.request()
-            .input("CertificationType", certificationType)
-            .input("EquipmentName", equipmentName)
-            .input("EquipmentType", equipmentType)
             .input("VerificationResult", verificationResult)
             .input("DateCert", dateCert)
-            .input("Comments", comments);
+            .input("Comments", comments)
+            .input("QAID", Existing_QAID);
         
         if (recordType === "New Record") {
             if (!Array.isArray(certifications) || certifications.length === 0) {
@@ -197,7 +197,11 @@ router.post("/upload-qa", async(req, res) => {
             }
 
             for (const cert of certifications) {
+                // Generate QA ID for current Year
+                const QAID = await generateQAID(pool);
+
                 await pool.request()
+                    .input("QAID", QAID)
                     .input("CertificationType", certificationType)
                     .input("EquipmentName", equipmentName)
                     .input("EquipmentType", equipmentType)
@@ -220,7 +224,7 @@ router.post("/upload-qa", async(req, res) => {
                             [Archive]
                         )
                         VALUES (
-                            12022,
+                            @QAID,
                             'Eli',
                             GETDATE(),
                             @CertificationType,
@@ -237,30 +241,70 @@ router.post("/upload-qa", async(req, res) => {
 
             return res.json({ message: "QA records created successfully." });
         } else {
-            const nameToUpdate = Array.isArray(certifications)
-                ? certifications[0]
-                : certificationName;
-
+            console.log("Existing_QAID:", Existing_QAID);
             await request
-            .input("CertificationName", nameToUpdate)
             .query(`
                 UPDATE tblCertifications
                 SET
-                    [Certification Type] = @CertificationType,
-                    [Equipment Name] = @EquipmentName,
-                    [Equipment Type] = @EquipmentType,
                     [Verification Result] = @VerificationResult,
                     [Date Certification] = @DateCert,
                     Comments = @Comments
-                WHERE [Certification Name] = @CertificationName
+                WHERE [QAID] = @QAID
             `);
 
-        return res.json({ message: "QA record updated successfully" });
+            return res.json({ message: `QA record updated successfully: ${Existing_QAID}` });
         }
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: err.message || "Database Error" });
     }
 })
+/**
+ * Generates a QA ID for the current Year the record is being inserted in.
+ * 
+ * @param {*} pool - The current connection to the backend
+ * @returns ID in the format YYYY_{ID}
+ */
+async function generateQAID(pool) {
+    const year = new Date().getFullYear();
+
+    const result = await pool.request()
+        .input("start", `${year}0101`)
+        .input("end", `${year + 1}0101`)
+        .query(`
+            SELECT COUNT(*) AS cnt
+            FROM tblCertifications
+            WHERE [Created On] >= @start
+              AND [Created On] < @end
+        `);
+    
+    const nextNum = (result.recordset[0].cnt || 0) + 1;
+
+    return `${year}_${nextNum}`;
+}
+
+/**
+ * Generates a Issue ID for the current Year the record is being inserted in.
+ * 
+ * @param {*} pool - The current connection to the backend
+ * @returns ID in the format YYYY_{ID}
+ */
+async function generateIssueID(pool) {
+    const year = new Date().getFullYear();
+    
+    const result = await pool.request()
+        .input("start", `${year}0101`)
+        .input("end", `${year + 1}0101`)
+        .query(`
+            SELECT COUNT(*) AS cnt
+            FROM tblDataCollectionIssuesList
+            WHERE [ReportedDate] >= @start
+              AND [ReportedDate] < @end
+        `);
+    
+    const nextNum = (result.recordset[0].cnt || 0) + 1;
+
+    return `${year}_${nextNum}`;
+}
 
 module.exports = router;

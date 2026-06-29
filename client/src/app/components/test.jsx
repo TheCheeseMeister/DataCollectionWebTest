@@ -75,6 +75,7 @@ function EquipmentQAForm({ lookups }) {
     const [dateRecord, setDateRecord] = useState("");
     const [dateCert, setDateCert] = useState("");
     const [comments, setComments] = useState("");
+    const [QAID, setQAID] = useState("");
 
     const filteredQACerts = lookups.QACerts.filter(item => {
         const itemDate = item["Created On"]?.split("T")[0];
@@ -104,7 +105,8 @@ function EquipmentQAForm({ lookups }) {
             verificationResult,
             dateCert,
             comments,
-            certifications: selectedCertifications
+            certifications: selectedCertifications,
+            Existing_QAID: QAID
         };
         
         try {
@@ -158,9 +160,11 @@ function EquipmentQAForm({ lookups }) {
                         <label className="block text-sm mb-1 font-bold">
                             QA ID
                         </label>
-                        <select 
+                        <select value={QAID}
                         onChange={(e) => {
                             const QAID = e.target.value;
+                            setQAID(e.target.value);
+
                             const record = lookups.QACerts.find(
                                 item => item.QAID === QAID
                             );

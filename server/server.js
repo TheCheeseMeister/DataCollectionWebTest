@@ -4,6 +4,12 @@ const express = require('express');
 const app = express();
 const cors = require("cors");
 
+const { getConnection } = require("./db");
+
+getConnection().then(() => {
+    console.log("DB warmed at startup");
+});
+
 // Routes
 const verificationRoutes = require("./routes/VerificationResult");
 

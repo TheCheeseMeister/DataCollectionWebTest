@@ -7,8 +7,11 @@ import Test from "./components/test";
 export default function Tabs() {
   const tabs = [
     { id: "home", label: "Home", content: <Home />},
-    { id: "test", label: "Test", content: <Test />},
-    { id: "ing", label: "testing", content: "Heck Content"}
+    { id: "test", label: "Equipment QA", content: <Test />},
+    { id: "network", label: "Network Collection", content: "Network Content"},
+    { id: "process", label: "Processing Checker", content: "Processing"},
+    { id: "qa", label: "QA Review", content: "QA"},
+    { id: "skid", label: "Skid Processing", content: "Skid"},
   ];
 
   const [activeTab, setActiveTab] = useState(tabs[0].id);
@@ -28,7 +31,7 @@ export default function Tabs() {
           {tabs.map((tab) => (
             <button className=
             {
-              `text-black border-2 text-center w-32 h-12 
+              `text-black border-2 text-center w-42 h-12 
               ${activeTab === tab.id ? "bg-blue-200 bold hover:bg-blue-300" : "bg-white hover:bg-gray-300"}`
             }
               key={tab.id} 
